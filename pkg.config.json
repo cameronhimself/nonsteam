@@ -1,0 +1,6 @@
+{
+  "name": "nonsteam",
+  "pkg": {
+    "assets": "dist/resources/**/*"
+  }
+}
