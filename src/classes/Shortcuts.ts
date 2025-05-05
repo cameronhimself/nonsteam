@@ -37,7 +37,7 @@ export class Shortcuts {
     return shortcuts;
   }
 
-  static async load(pathArg?: string): Promise<Shortcuts> {
+  static async load(pathArg?: string): Promise<Shortcuts & { loadedPath: string }> {
     let loadPath: string;
     if (pathArg) {
       loadPath = pathArg;
@@ -50,7 +50,7 @@ installed somewhere non-standard you'll likely need to explicitly provide the pa
       loadPath = filePath;
     }
     const shortcuts = await this.fromFile(loadPath);
-    return shortcuts;
+    return shortcuts as Shortcuts & { loadedPath: string };
   }
 
   public async save(pathArg?: string): Promise<void> {
@@ -62,11 +62,11 @@ installed somewhere non-standard you'll likely need to explicitly provide the pa
     }
   }
 
-  static async fromFile(file: string): Promise<Shortcuts> {
+  static async fromFile(file: string): Promise<Shortcuts & { loadedPath: string }> {
     const data = await fs.readFile(file);
     const shortcuts = Shortcuts.fromBuffer(data);
     shortcuts.loadedPath = file;
-    return shortcuts;
+    return shortcuts as Shortcuts & { loadedPath: string };
   }
 
   public toBuffer(): Buffer {
