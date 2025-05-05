@@ -3,8 +3,9 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { exec } from "@yao-pkg/pkg";
 import { mkdirp } from "mkdirp";
-import { tgz } from "compressing";
+import compressing from "compressing";
 import { version as nonsteamVersion } from "../package.json";
+import { rimraf } from "rimraf";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,18 +19,20 @@ const targets: string = [
   "linux-x64",
   "linux-arm64",
   "alpine-x64",
-  "linux-arm64",
   "win-x64",
   "macos-x64",
   "macos-arm64",
 ].map(t => `${NODE_VERSION}-${t}`).join(",");
 
 const compress = async (name: string, source: string, dest: string) => {
+  const format: "tgz" | "zip" = name.includes("macos-") || name.includes("win-") ? "zip" : "tgz";
+  const compressor = compressing[format];
   const outdir = path.resolve(BINARIES_DIR, name);
   await mkdirp(outdir);
   await fs.rename(source, path.resolve(outdir, path.basename(source)));
   await fs.rename(path.resolve(outdir, path.basename(source)), path.resolve(outdir, `nonsteam${source.includes(".exe") ? ".exe" : ""}`))
-  await tgz.compressDir(outdir, dest);
+  await compressor.compressDir(outdir, `${dest}.${format === "tgz" ? "tar.gz" : "zip"}`);
+  await rimraf(outdir);
 };
 
 const main = async () => {
@@ -47,8 +50,8 @@ const main = async () => {
   const compressPromises = (await fs.readdir(BINARIES_DIR)).map(file => {
     const fullPath = path.resolve(BINARIES_DIR, file);
     const name = `${path.basename(file).replace(".exe", "")}-${nonsteamVersion}`;
-    const tgzFilename = path.resolve(BINARIES_DIR, `${name}.tgz`);
-    return compress(name, fullPath, tgzFilename);
+    const outputPath = path.resolve(BINARIES_DIR, name);
+    return compress(name, fullPath, outputPath);
   });
 
   await Promise.all(compressPromises);
