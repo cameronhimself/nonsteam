@@ -5,19 +5,22 @@
   "license": "ISC",
   "author": "J. Cameron McDonald",
   "type": "module",
-  "files": ["dist/bundle/**/*"],
+  "files": [
+    "dist/bundle/**/*"
+  ],
   "main": "dist/bundle/index.js",
   "bin": "dist/bundle/cli.js",
   "scripts": {
     "build:bundle": "rollup -c --bundleConfigAsCjs --environment entry:bundle",
     "prebuild:executable": "rollup -c --bundleConfigAsCjs --environment entry:executable",
-    "build:executable": "pkg -c pkg.config.json dist/executable/packaged.js --out-dir dist --no-bytecode --public --public-packages '*'",
+    "build:executable": "tsx scripts/build.ts",
     "clean": "rimraf dist",
     "build": "npm run clean && npm run build:bundle && npm run build:executable",
     "prepack": "npm run clean && npm run build:bundle",
     "test": "jest"
   },
   "devDependencies": {
+    "@release-it/conventional-changelog": "^10.0.1",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^12.1.2",
@@ -27,7 +30,9 @@
     "@types/lodash": "^4.17.16",
     "@types/node": "^22.15.2",
     "@yao-pkg/pkg": "^6.4.1",
+    "compressing": "^1.10.1",
     "jest": "^29.7.0",
+    "release-it": "^19.0.2",
     "rimraf": "^6.0.1",
     "rollup": "^4.40.1",
     "ts-jest": "^29.3.2",

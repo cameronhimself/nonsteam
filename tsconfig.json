@@ -8,6 +8,7 @@
     "strict": true,
     "skipLibCheck": true,
     "declaration": true,
+    "resolveJsonModule": true,
     "outDir": "dist/bundle"
   }
 }
