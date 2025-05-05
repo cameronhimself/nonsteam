@@ -14,9 +14,11 @@
     "build:bundle": "rollup -c --bundleConfigAsCjs --environment entry:bundle",
     "prebuild:executable": "rollup -c --bundleConfigAsCjs --environment entry:executable",
     "build:executable": "tsx scripts/build.ts",
-    "clean": "rimraf dist",
-    "build": "npm run clean && npm run build:bundle && npm run build:executable",
-    "prepack": "npm run clean && npm run build:bundle",
+    "clean:bundle": "rimraf dist/bundle",
+    "clean:executable": "rimraf dist/executable",
+    "clean:all": "rimraf dist",
+    "build": "npm run clean:all && npm run build:bundle && npm run build:executable",
+    "prepack": "npm run clean:bundle && npm run build:bundle",
     "test": "jest"
   },
   "devDependencies": {
