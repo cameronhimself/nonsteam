@@ -18,7 +18,7 @@ export type EntryObject = {
   OpenVR: boolean;
   Devkit: boolean;
   DevkitGameID: string;
-  DevkitOverrideAppID: number;
+  DevkitOverrideAppID: string;
   LastPlayTime: Date;
   FlatpakAppID: string;
   tags: Array<string>;
@@ -30,7 +30,7 @@ export type SteamFieldBooleanKey = ExtendsUnion<
   SteamFieldKey,
   "IsHidden" | "AllowDesktopConfig" | "AllowOverlay" | "Devkit" | "OpenVR"
 >;
-export type SteamFieldNumberKey = ExtendsUnion<SteamFieldKey, "appid" | "DevkitOverrideAppID">;
+export type SteamFieldNumberKey = ExtendsUnion<SteamFieldKey, "appid">;
 export type SteamFieldDateKey = ExtendsUnion<SteamFieldKey, "LastPlayTime">;
 export type SteamFieldStringKey = ExtendsUnion<
   SteamFieldKey,
@@ -41,6 +41,7 @@ export type SteamFieldStringKey = ExtendsUnion<
   | "ShortcutPath"
   | "LaunchOptions"
   | "DevkitGameID"
+  | "DevkitOverrideAppID"
   | "FlatpakAppID"
 >;
 export type SteamFieldStringArrayKey = ExtendsUnion<SteamFieldKey, "tags">;

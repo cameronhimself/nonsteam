@@ -33,7 +33,7 @@ export interface IEntry {
   openVr: boolean;
   devkit: boolean;
   devkitGameId: string;
-  devkitOverrideAppId: number;
+  devkitOverrideAppId: string;
   lastPlayTime: Date;
   flatpakAppId: string;
   tags: Array<string>;
@@ -57,7 +57,7 @@ export class Entry implements IEntry {
       Field.fromKeyValue("OpenVR", Number(config?.openVr || false)),
       Field.fromKeyValue("Devkit", Number(config?.devkit || false)),
       Field.fromKeyValue("DevkitGameID", config?.devkitGameId || ""),
-      Field.fromKeyValue("DevkitOverrideAppID", config?.devkitOverrideAppId || 0),
+      Field.fromKeyValue("DevkitOverrideAppID", config?.devkitOverrideAppId || ""),
       Field.fromKeyValue("LastPlayTime", Number(config?.lastPlayTime ? Math.round(Number(config.lastPlayTime) / 1000) : 0)),
       Field.fromKeyValue("FlatpakAppID", config?.flatpakAppId || ""),
       Field.fromKeyValue("tags", config?.tags || []),
