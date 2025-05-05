@@ -1,3 +1,7 @@
+![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/cameronhimself/nonsteam/latest/total)
+![NPM Downloads](https://img.shields.io/npm/dw/nonsteam)
+
+
 # nonsteam
 
 `nonsteam` is a tool and library for viewing and editing your non-Steam game entries from the command line or with code.  
@@ -14,10 +18,7 @@ If you already have node/npm installed you can simply install as a global module
 npm i -g nonsteam
 ```
 
-#### Steam Deck, Linux, and Mac
-
-
-#### Windows
+Otherwise, you can download a precompiled binary from the [latest release](https://github.com/cameronhimself/nonsteam/releases/latest) and put in your `PATH`.
 
 ### Basic usage
 
@@ -57,11 +58,36 @@ $ nonsteam add -w \
 
 ... Added app with ID: 4148342750
 
-# remomve a non-Steam game
+# remove a non-Steam game
 $ nonsteam delete -w 4148342750
 
 ... Deleted app with ID: 4148342750
 ```
+
+### Fields for non-Steam games
+
+The field names for non-Steam game entries are inconsistent inside of Steam's binary format. For reference, here are all of Steam's native field names, with their equivalents as CLI options and in the `nonsteam` API.
+
+Note that, in Steam's format, all of the fields are either strings, 32-bit unsigned integers, or string arrays. Other types are coerced back and forth as needed within `nonsteam`.
+
+| Steam | `nonsteam` CLI | `nonsteam` API | Type |
+| - | - | - | - |
+| `appid` | `--app-id` | `appId` | `number` (10-digit) |
+| `AppName` | `--app-name` | `appName` | `string` |
+| `Exe` | `--exe` | `exe` | `string` |
+| `StartDir` | `--start-dir` | `startDir` | `string` |
+| `icon` | `--icon` | `icon` | `string` |
+| `ShortcutPath` | `--shortcut-path` | `shortcutPath` | `string` |
+| `LaunchOptions` | `--launch-options` | `launchOptions` | `string` |
+| `IsHidden` | `--is-hidden` | `isHidden` | `boolean` |
+| `AllowDesktopConfig` | `--allow-desktop-config` | `allowDesktopConfig` | `boolean` |
+| `OpenVR` | `--open-vr` | `openVr` | `boolean` |
+| `Devkit` | `--devkit` | `devkit` | `boolean` |
+| `DevkitGameID` | `--devkit-game-id` | `devkitGameId` | `string` |
+| `DevkitOverrideAppID` | `--devkit-override-app-id` | `devkitOverrideAppId` | `string` |
+| `LastPlayTime` | `--last-play-time` | `lastPlayTime` | `Date` |
+| `FlatpakAppID` | `--flatpak-app-id` | `flatpakAppId` | `string` |
+| `tags` | `--tags` | `tags` | `string[]` |
 
 ### Using a specific non-Steam games file
 
@@ -84,7 +110,6 @@ You are required to be explicit about how to save your changes. There are two op
 
 The former is more convenient, but the latter is safer. You're strongly encouraged to make backups before using `--overwrite`.
 
-
 ### Environment variables
 
 If you find you keep reading and writing to the same file, which is very typical, and you're tired of typing `-w -i <path>`, you can use the following environment variables to set defaults:
@@ -94,3 +119,37 @@ NONSTEAM_OPTION_INPUT="$HOME/.steam/steam/userdata/241873089/config/shortcuts.vd
 NONSTEAM_OPTION_OVERWRITE=true
 ```
 
+## API
+
+In addition to the CLI interface, `nonsteam` also provides a TypeScript API. Documentation is coming, but, for now, here's a simple example:
+
+```typescript
+import { load } from "nonsteam";
+
+load().then(nonsteam => nonsteam
+  .addEntry({
+    appName: "My Non-Steam App",
+    exe: "/path/to/executable",
+  })
+  .deleteEntry(1987654311)
+  .editEntry(1234567890, {
+    icon: "path/to/new/icon.png",
+  })
+  .save().then(() => console.log("success!"));
+);
+```
+
+Or, with `async/await`:
+
+```typescript
+const nonsteam = (await load())
+  .addEntry({
+    appName: "My Non-Steam App",
+    exe: "/path/to/executable",
+  })
+  .deleteEntry(1987654311)
+  .editEntry(1234567890, {
+    icon: "path/to/new/icon.png",
+  });
+await nonsteam.save();
+```
