@@ -15,6 +15,7 @@ import chalk from "chalk";
 import path from "path";
 import { BLANK_ENTRY } from "../constants";
 import { ENV_OPTION_INPUT_KEY, ENV_OPTION_OVERWRITE_KEY } from "./constants";
+import { version } from "../../package.json";
 
 const program = new BaseCommand();
 
@@ -54,7 +55,7 @@ const dryRun = (outputPath: string, entry: IEntry, opts: IEntry, preamble: strin
 program
   .name('nonsteam')
   .description('CLI for manipulating your non-Steam game entries')
-  .version('0.1.0')
+  .version(version)
   .addOption(new Option("--verbose, -v", "Show more informational output."))
   .addOption(new Option("--quiet, -q", "Suppress warnings and show less informational output. Overrides --verbose."))
   .hook("preAction", (prg) => {
