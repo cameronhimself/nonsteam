@@ -2,6 +2,7 @@ import typescript from '@rollup/plugin-typescript';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import tsconfig from "./tsconfig.json";
+import json from '@rollup/plugin-json';
 
 const isExecutable = process.env.entry === "executable";
 
@@ -21,6 +22,7 @@ export default {
         preferBuiltins: true,
       }),
     ] : []),
+    json(),
     commonjs({
       requireReturnsDefault: true,
     }),
