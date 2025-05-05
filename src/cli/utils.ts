@@ -175,8 +175,8 @@ export const getShortcuts = async (pathArg?: string): Promise<Shortcuts> => {
   let shortcuts: Shortcuts;
   try {
     shortcuts = await Shortcuts.fromFile(path);
-  } catch {
-    throw new Error();
+  } catch(err) {
+    throw new Error((err as Error).message);
   }
   return shortcuts;
 };
