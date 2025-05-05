@@ -1,4 +1,3 @@
-import { buffer } from "stream/consumers";
 import { NUL, SOH, STEAM_FIELDS, STX } from "../constants";
 import {
   SteamFieldKey,
@@ -13,7 +12,7 @@ import {
   SteamFieldStringArrayKey,
   SteamFieldStringArrayPrimitiveKey,
 } from "../types";
-import { bufferFromMixed, dump, parseFieldBuffer, parseNumberBuffer, parseStringArrayBuffer, parseStringBuffer } from "../utils";
+import { bufferFromMixed, parseFieldBuffer, parseNumberBuffer, parseStringArrayBuffer, parseStringBuffer } from "../utils";
 
 export abstract class Field {
   static fromKeyValue(key: SteamFieldBooleanKey, value: number): BooleanField;
@@ -40,11 +39,11 @@ export abstract class Field {
     }
   }
 
-  static fromBuffer<TKey extends SteamFieldBooleanKey>(raw: Buffer): BooleanField;
-  static fromBuffer<TKey extends SteamFieldNumberKey>(raw: Buffer): NumberField;
-  static fromBuffer<TKey extends SteamFieldDateKey>(raw: Buffer): DateField;
-  static fromBuffer<TKey extends SteamFieldStringKey>(raw: Buffer): StringField;
-  static fromBuffer<TKey extends SteamFieldStringArrayKey>(raw: Buffer): StringArrayField;
+  static fromBuffer(raw: Buffer): BooleanField;
+  static fromBuffer<_TKey extends SteamFieldNumberKey>(raw: Buffer): NumberField;
+  static fromBuffer<_TKey extends SteamFieldDateKey>(raw: Buffer): DateField;
+  static fromBuffer<_TKey extends SteamFieldStringKey>(raw: Buffer): StringField;
+  static fromBuffer<_TKey extends SteamFieldStringArrayKey>(raw: Buffer): StringArrayField;
   static fromBuffer(raw: Buffer): PrimitiveField | undefined {
     const [key,] = parseFieldBuffer(raw);
     if (!key) {

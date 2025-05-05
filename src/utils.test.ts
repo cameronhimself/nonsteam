@@ -3,15 +3,12 @@ import { assert } from "chai";
 import { NUL, SOH, STX } from "./constants";
 import {
   bufferFromMixed,
-  dump,
   findIndexOfBufferInBuffer,
   getFieldBuffer,
-  getGenericFieldBuffer,
   parseNumberBuffer,
   parseStringArrayBuffer,
   parseStringBuffer,
 } from "./utils";
-import { Shortcuts } from "./classes";
 
 describe("parseNumberBuffer", () => {
   it("parses a number from a buffer", () => {

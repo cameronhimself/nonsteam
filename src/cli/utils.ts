@@ -4,7 +4,7 @@ import { findShortcutsFile, getRandomAppId } from "../utils";
 import fs from "fs/promises";
 import path from "path";
 import { Shortcuts } from "../classes";
-import { EntryObject, FieldType, SteamFieldKey } from "../types";
+import { EntryObject } from "../types";
 import * as commander from "commander";
 
 type Message = Array<string | Array<string>>;
@@ -60,7 +60,7 @@ log.info = function (...message) {
 };
 
 export const asInt = (value: string | undefined): number => {
-  const parsedValue = parseInt(value as any, 10);
+  const parsedValue = parseInt(value as string, 10);
   if (isNaN(parsedValue)) {
     throw new commander.InvalidArgumentError("It must be an integer.");
   }
@@ -101,7 +101,7 @@ export const asAppId = (value: string): number => {
   let intValue: number;
   try {
     intValue = asInt(value);
-  } catch (err) {
+  } catch {
     throw error;
   }
   if (intValue > 9999999999 || intValue < 1000000000) {
@@ -114,7 +114,9 @@ export const asAppIds = (value: string, previous?: Array<number | string>): Arra
   let intValue: number | undefined = undefined;
   try {
     intValue = asInt(value);
-  } catch {}
+  } catch {
+    // continue regardless of error
+  }
   return previous ? [...previous, intValue || value] : [intValue || value];
 };
 
@@ -134,7 +136,6 @@ export const asDate = (value: string) => {
 };
 
 export const asStringArray = (value: string) => {
-  const nul = String.fromCharCode(0);
   const values = value.split(/,(?<!\\,)/).map(value => value.replace(/\\,/g, ","))
   return values;
 };
@@ -174,7 +175,7 @@ export const getShortcuts = async (pathArg?: string): Promise<Shortcuts> => {
   let shortcuts: Shortcuts;
   try {
     shortcuts = await Shortcuts.fromFile(path);
-  } catch (err) {
+  } catch {
     throw new Error();
   }
   return shortcuts;

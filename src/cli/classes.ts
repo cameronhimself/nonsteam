@@ -40,7 +40,7 @@ export class GroupedOptionsHelp extends Help {
     const optionGroups: Record<string, Array<Option>> = {};
 
     const base = super.formatHelp(cmd, helper);
-    const { index } = base.match(/\nOptions\:/)!;
+    const { index } = base.match(/\nOptions:/)!;
     let output = [base.slice(0, index)];
 
     for (const opt of (helper.visibleOptions(cmd) as Array<GroupedOption>)) {
@@ -72,6 +72,9 @@ export class GroupedOptionsHelp extends Help {
 }
 
 export class Command extends BaseCommand {
+  _usage?: string;
+  _helpOption?: string | boolean;
+
   constructor(name: string) {
     super(name);
   }
@@ -80,7 +83,7 @@ export class Command extends BaseCommand {
   usage(str: string): this;
   usage(str?: string): string | this {
     if (str === undefined) {
-      if ((this as any)._usage) return (this as any)._usage;
+      if (this._usage) return this._usage;
 
       const args = this.registeredArguments.map((arg) => {
         const nameOutput = arg.name() + (arg.variadic === true ? '...' : '');
@@ -90,12 +93,12 @@ export class Command extends BaseCommand {
         .concat(
           this.commands.length ? '[command]' : [],
           this.registeredArguments.length ? args : [],
-          this.options.length || (this as any)._helpOption !== null ? '[options]' : [],
+          this.options.length || this._helpOption !== null ? '[options]' : [],
         )
         .join(' ');
     }
 
-    (this as any)._usage = str;
+    this._usage = str;
     return this;
   }
 

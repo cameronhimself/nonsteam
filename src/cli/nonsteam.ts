@@ -8,7 +8,7 @@ import {
 } from "./options";
 import { Command } from "./classes";
 import { Argument, Command as BaseCommand, Option } from "commander";
-import { log, getEntries, getShortcuts, msg, prettyValue, asAppId, generateUniqueAppId, asInt, Verbosity, getEnvConfig } from "./utils";
+import { log, getEntries, getShortcuts, msg, prettyValue, generateUniqueAppId, asInt, Verbosity, getEnvConfig } from "./utils";
 import { EntryObject } from "../types";
 import { Entry, IEntry, Shortcuts } from "../classes";
 import chalk from "chalk";
@@ -57,7 +57,7 @@ program
   .version('0.1.0')
   .addOption(new Option("--verbose, -v", "Show more informational output."))
   .addOption(new Option("--quiet, -q", "Suppress warnings and show less informational output. Overrides --verbose."))
-  .hook("preAction", (prg, cmd) => {
+  .hook("preAction", (prg) => {
     log.verbosity = Verbosity.Normal;
     if (prg.opts().verbose) {
       log.verbosity = Verbosity.Verbose;

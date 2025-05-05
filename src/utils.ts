@@ -1,5 +1,5 @@
 import { BS, NUL, SOH, STEAM_FIELDS, STX } from "./constants";
-import { FieldType, SteamFieldKey } from "./types";
+import { SteamFieldKey } from "./types";
 import { promisified as regedit } from "regedit";
 import fs from "fs";
 import os from "os";
@@ -79,7 +79,9 @@ export const findShortcutsFile = async (): Promise<[boolean, string, Array<strin
   const userDirs: Array<string> = [];
   try {
     fs.readdirSync(usersPath).forEach(dir => userDirs.push(dir));
-  } catch(err) {}
+  } catch {
+    // continue regardless of error
+  }
   if (!userDirs.length) {
     return [false, undefined, searchPaths];
   }

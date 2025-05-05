@@ -14,11 +14,10 @@ import {
   SteamFieldNumberKey,
   SteamFieldDateKey,
   SteamFieldStringKey,
-  FieldType,
   SteamFieldStringArrayKey,
   EntryObject,
 } from "../types";
-import { bufferFromMixed, dump, getFieldBuffer, getRandomAppId } from "../utils";
+import { bufferFromMixed, getFieldBuffer, getRandomAppId } from "../utils";
 
 export interface IEntry {
   appId: number;
@@ -86,7 +85,8 @@ export class Entry implements IEntry {
   public setValues(values: Partial<IEntry>) {
     for (const k in values) {
       if (k in BLANK_ENTRY) {
-        this[k as keyof typeof this] = values[k as keyof IEntry] as any;
+        const value = values[k as keyof IEntry] as any; //eslint-disable-line
+        this[k as keyof typeof this] = value;
       }
     }
   }

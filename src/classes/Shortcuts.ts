@@ -1,8 +1,8 @@
 import fs from "fs/promises";
 import { Entry, IEntry } from "./Entry";
 import { BS, NUL } from "../constants";
-import { bufferFromMixed, dump, findShortcutsFile } from "../utils";
-import { EntryObject, FieldType, SteamFieldKey } from "../types";
+import { bufferFromMixed, findShortcutsFile } from "../utils";
+import { EntryObject } from "../types";
 
 export class Shortcuts {
   public loadedPath: string | undefined;
@@ -12,7 +12,7 @@ export class Shortcuts {
     const shortcuts = new Shortcuts();
 
     let buf = vdfBuf.subarray(11); // skip intro
-    let entries: Array<Buffer> = [];
+    const entries: Array<Buffer> = [];
     let done = false;
     while (buf) {
       for (const i of buf.keys()) {
