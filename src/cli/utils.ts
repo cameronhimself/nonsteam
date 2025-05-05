@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { SHORTCUTS_PATH_ENV_KEY } from "./constants";
+import { ENV_OPTION_INPUT_KEY, ENV_OPTION_OVERWRITE_KEY, FALSE_RE, FALSE_STRINGS, TRUE_RE, TRUE_STRINGS} from "./constants";
 import { findShortcutsFile, getRandomAppId } from "../utils";
 import fs from "fs/promises";
 import path from "path";
@@ -80,23 +80,19 @@ export const prettyValue = (v: string | number | boolean | Array<string> | Date 
   return '';
 };
 
-export const asBoolean = (value?: string): boolean => {
+export const asBoolean = (value?: string, defaultValue = true): boolean => {
   if (!value) {
-    return true;
+    return defaultValue;
   }
-  const trueValues: Array<string> = ["true", "yes", "1"];
-  const falseValues: Array<string> = ["false", "no", "0"];
-  const trueRe = new RegExp(`^(?:${trueValues.join("|")})$`);
-  const falseRe = new RegExp(`^(?:${falseValues.join("|")})$`);
 
-  if (value.match(trueRe)) {
+  if (value.match(TRUE_RE)) {
     return true;
   }
-  if (value.match(falseRe)) {
+  if (value.match(FALSE_RE)) {
     return false;
   }
   throw new commander.InvalidOptionArgumentError(
-    `It must be one of: ${[...trueValues, ...falseValues].join(", ")}`
+    `It must be one of: ${[...TRUE_STRINGS, ...FALSE_STRINGS].join(", ")}`
   );
 };
 
@@ -143,6 +139,12 @@ export const asStringArray = (value: string) => {
   return values;
 };
 
+export const getEnvConfig = (opts: { overwrite?: boolean, input?: string }): { overwrite: boolean, input: string | undefined } => {
+  const overwrite = opts.overwrite !== undefined ? opts.overwrite : asBoolean(process.env[ENV_OPTION_OVERWRITE_KEY], false);
+  const input = opts.input !== undefined ? opts.input : process.env[ENV_OPTION_INPUT_KEY];
+  return { overwrite, input };
+};
+
 export const generateUniqueAppId = (shortcuts: Shortcuts) => {
   const existingAppIds = shortcuts.entries.map(e => e.appId);
   let appId = getRandomAppId();
@@ -180,12 +182,12 @@ export const getShortcuts = async (pathArg?: string): Promise<Shortcuts> => {
 
 export const getShortcutsPath = async (pathArg?: string): Promise<string> => {
   let pathToUse: string | undefined;
-  const envPath = process.env[SHORTCUTS_PATH_ENV_KEY];
+  const envPath = process.env[ENV_OPTION_INPUT_KEY];
 
   if (envPath && pathArg) {
     log.info(
       `The input file is set by both an argument ('${pathArg}') and an env var`,
-      `(${SHORTCUTS_PATH_ENV_KEY}='${envPath}'). The argument takes precedence.`
+      `(${ENV_OPTION_INPUT_KEY}='${envPath}'). The argument takes precedence.`
     );
   }
 
@@ -194,7 +196,7 @@ export const getShortcutsPath = async (pathArg?: string): Promise<string> => {
     log.info(`Using input file from: '${pathToUse}'`);
   } else if (envPath) {
     pathToUse = envPath;
-    log.info(`Using input file from '${SHORTCUTS_PATH_ENV_KEY}' env var: '${pathToUse}'`);
+    log.info(`Using input file from '${ENV_OPTION_INPUT_KEY}' env var: '${pathToUse}'`);
   }
 
   if (pathToUse) {
@@ -224,7 +226,7 @@ export const getShortcutsPath = async (pathArg?: string): Promise<string> => {
       ...searchPaths.map(s => `  ${s}`),
       "",
       [`If your Steam installation is somewhere non-standard, you'll need to provide the path to shortcuts.vdf`,
-       `explicitly using the --input arg, or you can set the ${SHORTCUTS_PATH_ENV_KEY} environment variable.`]
+       `explicitly using the --input arg, or you can set the ${ENV_OPTION_INPUT_KEY} environment variable.`]
     ));
   }
   if (!exists) {

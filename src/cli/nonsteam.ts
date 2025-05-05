@@ -8,12 +8,13 @@ import {
 } from "./options";
 import { Command } from "./classes";
 import { Argument, Command as BaseCommand, Option } from "commander";
-import { log, getEntries, getShortcuts, msg, prettyValue, asAppId, generateUniqueAppId, asInt, Verbosity } from "./utils";
+import { log, getEntries, getShortcuts, msg, prettyValue, asAppId, generateUniqueAppId, asInt, Verbosity, getEnvConfig } from "./utils";
 import { EntryObject } from "../types";
 import { Entry, IEntry, Shortcuts } from "../classes";
 import chalk from "chalk";
 import path from "path";
 import { BLANK_ENTRY } from "../constants";
+import { ENV_OPTION_INPUT_KEY, ENV_OPTION_OVERWRITE_KEY } from "./constants";
 
 const program = new BaseCommand();
 
@@ -79,9 +80,10 @@ program.addCommand(new Command('get')
   .option("-d, --details", "Display full details for each entry.")
   .option("-j, --as-json", "Format output as JSON. Implies --details.")
   .action(async (appIds: Array<number | string>, opts: GetOpts) => {
+    const { input } = getEnvConfig(opts);
     let entries: Array<EntryObject>;
     try {
-      entries = (await getEntries(opts.input))
+      entries = (await getEntries(input))
         .filter(entry => appIds.length ? appIds.includes(entry.appid) : true)
     } catch(err) {
       log.error((err as Error).message);
@@ -123,21 +125,24 @@ program.addCommand(new Command('add')
   .addOptions(writeOpts)
   .addOptions(fieldValueOpts)
   .action(async (opts: WriteOptions) => {
-    console.log(opts);
-    if (!opts.overwrite && !opts.output) {
-      log.error(msg(`Either --overwrite or --output must be specified${opts.dryRun ? ", even with --dry-run." : "."}`));
+    const { overwrite, input } = getEnvConfig(opts);
+    if (!overwrite && !opts.output) {
+      log.error(msg([
+        `Either --overwrite must be set or --output must be specified${opts.dryRun ? ", even with --dry-run." : "."}`,
+        `These can also be set with the ${ENV_OPTION_OVERWRITE_KEY} and ${ENV_OPTION_INPUT_KEY} environment variables.`,
+      ]));
       return;
     }
 
     let shortcuts: Shortcuts;
     try {
-      shortcuts = await getShortcuts(opts.input);
+      shortcuts = await getShortcuts(input);
     } catch(err) {
       log.error((err as Error).message);
       return;
     }
 
-    const outputPath: string = opts.overwrite
+    const outputPath: string = overwrite
       ? shortcuts.loadedPath!
       : path.resolve(process.cwd(), opts.output!);
 
@@ -170,14 +175,18 @@ program.addCommand(new Command('edit')
   .addOptions(writeOpts)
   .addOptions(fieldValueOpts)
   .action(async (appId: number, opts: WriteOptions) => {
-    if (!opts.overwrite && !opts.output) {
-      log.error(msg(`Either --overwrite or --output must be specified${opts.dryRun ? ", even with --dry-run." : "."}`));
+    const { overwrite, input } = getEnvConfig(opts);
+    if (!overwrite && !opts.output) {
+      log.error(msg([
+        `Either --overwrite must be set or --output must be specified${opts.dryRun ? ", even with --dry-run." : "."}`,
+        `These can also be set with the ${ENV_OPTION_OVERWRITE_KEY} and ${ENV_OPTION_INPUT_KEY} environment variables.`,
+      ]));
       return;
     }
 
     let shortcuts: Shortcuts;
     try {
-      shortcuts = await getShortcuts(opts.input);
+      shortcuts = await getShortcuts(input);
     } catch(err) {
       log.error((err as Error).message);
       return;
@@ -188,7 +197,7 @@ program.addCommand(new Command('edit')
       return;
     }
 
-    const outputPath: string = opts.overwrite
+    const outputPath: string = overwrite
       ? shortcuts.loadedPath!
       : path.resolve(process.cwd(), opts.output!);
 
@@ -209,14 +218,18 @@ program.addCommand(new Command("delete")
   .addOptions(commonOpts)
   .addOptions(saveOpts)
   .action(async (appId, opts) => {
-    if (!opts.overwrite && !opts.output) {
-      log.error(msg("Either --overwrite or --output must be specified."));
+    const { overwrite, input } = getEnvConfig(opts);
+    if (!overwrite && !opts.output) {
+      log.error(msg([
+        `Either --overwrite must be set or --output must be specified${opts.dryRun ? ", even with --dry-run." : "."}`,
+        `These can also be set with the ${ENV_OPTION_OVERWRITE_KEY} and ${ENV_OPTION_INPUT_KEY} environment variables.`,
+      ]));
       return;
     }
 
     let shortcuts: Shortcuts;
     try {
-      shortcuts = await getShortcuts(opts.input);
+      shortcuts = await getShortcuts(input);
     } catch(err) {
       log.error((err as Error).message);
       return;
@@ -228,7 +241,7 @@ program.addCommand(new Command("delete")
       return;
     }
 
-    const outputPath: string = opts.overwrite
+    const outputPath: string = overwrite
       ? shortcuts.loadedPath!
       : path.resolve(process.cwd(), opts.output!);
 
