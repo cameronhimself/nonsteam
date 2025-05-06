@@ -1,6 +1,9 @@
 ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/cameronhimself/nonsteam/latest/total)
 ![NPM Downloads](https://img.shields.io/npm/dw/nonsteam)
 
+### ⚠️ NOTICE: `nonsteam` is beta software! ⚠️
+
+While I've successfully used it for my own purposes, it's still in its infancy. Please [create an issue](https://github.com/cameronhimself/nonsteam/issues/new) if you encounter any problems, and be sure to make backups of your `shortcuts.vdf` file!
 
 # nonsteam
 
@@ -21,6 +24,8 @@ npm i -g nonsteam
 Otherwise, you can download a precompiled binary from the [latest release](https://github.com/cameronhimself/nonsteam/releases/latest) and put in your `PATH`.
 
 ### Basic usage
+
+You can run `nonsteam help` to see a list of available commands, and `nonsteam help <command>` to get more details.
 
 ```sh
 # list all non-Steam games
@@ -109,6 +114,20 @@ You are required to be explicit about how to save your changes. There are two op
 - `-o, --output <path>` will non-destructively write the updated file to the specified path.
 
 The former is more convenient, but the latter is safer. You're strongly encouraged to make backups before using `--overwrite`.
+
+### Creating a new non-Steam games file
+
+A blank file can be used as input, so you can simply do:
+
+```bash
+touch new-shortcuts.vdf
+nonsteam add -i new-shortcuts.vdf -w --app-name "My App"
+```
+
+```cmd
+echo $null > new-shortcuts.vdf
+nonsteam.exe add -i new-shortcuts.vdf -w --app-name "My App"
+```
 
 ### Environment variables
 
