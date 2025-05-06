@@ -9,12 +9,19 @@ export class Shortcuts {
   public entries: Array<Entry> = [];
 
   static fromBuffer(vdfBuf: Buffer) {
+    if (vdfBuf.length === 0) {
+      return new Shortcuts();
+    }
     const shortcuts = new Shortcuts();
 
     let buf = vdfBuf.subarray(11); // skip intro
     const entries: Array<Buffer> = [];
     let done = false;
+    let sanity = 0;
+
     while (buf) {
+      sanity++;
+
       for (const i of buf.keys()) {
         const b = buf[i];
         if (b === NUL) {
@@ -31,6 +38,9 @@ export class Shortcuts {
       }
       if (done) {
         break;
+      }
+      if (sanity > 1000) {
+        throw new Error("Cannot read vdf data.");
       }
     }
     shortcuts.entries = entries.map(e => Entry.fromBuffer(e));
