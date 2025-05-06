@@ -15,6 +15,6 @@ export default {
   },
   github: {
     release: true,
-    assets: "dist/binaries/*.tgz",
+    assets: ["dist/binaries/*.tar.gz", "dist/binaries/*.zip"],
   }
 } satisfies Config;
