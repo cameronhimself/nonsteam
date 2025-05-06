@@ -14,7 +14,7 @@ export default {
   treeshake: false,
   output: {
     dir: `dist/${process.env.entry}`,
-    format: 'esm',
+    format: isExecutable ? 'cjs' : 'esm',
   },
   plugins: [
     ...(isExecutable ? [
