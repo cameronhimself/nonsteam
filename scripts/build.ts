@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 
 const BASE_DIR = path.resolve(__dirname, "..");
 const DIST_DIR = path.resolve(BASE_DIR, "dist");
+const RESOURCES_DIR = path.resolve(DIST_DIR, "executable/resources");
 const BINARIES_DIR = path.resolve(DIST_DIR, "binaries");
 const NODE_VERSION = "node22";
 
@@ -36,6 +37,9 @@ const compress = async (name: string, source: string, dest: string) => {
 };
 
 const main = async () => {
+  const vbsDir = path.resolve(RESOURCES_DIR, "regedit/vbs");
+  await mkdirp(vbsDir);
+  await fs.cp(path.resolve(BASE_DIR, "node_modules/regedit/vbs"), vbsDir, { recursive: true });
   await mkdirp(BINARIES_DIR);
   await exec([
     path.resolve(DIST_DIR, "executable/packaged.js"),
