@@ -181,7 +181,7 @@ export const getFieldBuffer = (buf: Buffer, key: SteamFieldKey): Buffer => {
 };
 
 export const getRandomAppId = () => {
-  return getRandomInt(1000000000, 9999999999);
+  return getRandomInt(1000000000, 0xFFFFFFFF);
 };
 
 export const dump = (buf: Buffer) => {
