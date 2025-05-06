@@ -89,10 +89,12 @@ Note that, in Steam's format, all of the fields are either strings, 32-bit unsig
 | `OpenVR` | `--open-vr` | `openVr` | `boolean` |
 | `Devkit` | `--devkit` | `devkit` | `boolean` |
 | `DevkitGameID` | `--devkit-game-id` | `devkitGameId` | `string` |
-| `DevkitOverrideAppID` | `--devkit-override-app-id` | `devkitOverrideAppId` | `string` |
+| `DevkitOverrideAppID` | `--devkit-override-app-id` | `devkitOverrideAppId` | `number`* |
 | `LastPlayTime` | `--last-play-time` | `lastPlayTime` | `Date` |
 | `FlatpakAppID` | `--flatpak-app-id` | `flatpakAppId` | `string` |
 | `tags` | `--tags` | `tags` | `string[]` |
+
+*You might find Valve documentation indicating that this field is a string. This is simply wrong based on real-world experimentation.
 
 ### Using a specific non-Steam games file
 
