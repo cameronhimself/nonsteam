@@ -64,14 +64,13 @@ export const findShortcutsFile = async (): Promise<[boolean, string, Array<strin
     }
     return [false, undefined, [fullPath]];
   }
-
   const searchPaths = [
     path.resolve(os.homedir(), ".steam/steam"),
     path.resolve(os.homedir(), ".local/share/Steam"),
     path.resolve(os.homedir(), "snap/steam"),
     path.resolve(os.homedir(), ".var/app/com.valvesoftware.Steam/.steam/steam"),
   ];
-  const usersPath = searchPaths.find(p => fs.existsSync(path.resolve(p, "userdata")));
+  const usersPath = searchPaths.map(p => path.resolve(p, "userdata")).find(fs.existsSync);
   if (!usersPath) {
     return [false, undefined, searchPaths];
   }

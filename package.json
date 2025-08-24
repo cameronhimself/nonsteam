@@ -1,6 +1,6 @@
 {
   "name": "nonsteam",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "A tool and library for viewing and editing your non-Steam game entries from the command line or with code.",
   "license": "ISC",
   "author": "J. Cameron McDonald",
@@ -21,6 +21,7 @@
     "build": "npm run clean:all && npm run build:bundle && npm run build:executable",
     "prepack": "npm run clean:bundle && npm run build:bundle",
     "test:file": "mocha -r tsx",
+    "nonsteam": "tsx src/cli/index.ts",
     "test": "npm run test:file src/**/*.test.ts src/*.test.ts"
   },
   "devDependencies": {
