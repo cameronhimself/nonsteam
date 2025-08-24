@@ -10,6 +10,7 @@
   ],
   "main": "dist/bundle/index.js",
   "bin": "dist/bundle/cli.js",
+  "types": "dist/bundle/types.d.ts",
   "scripts": {
     "build:bundle": "rollup -c --bundleConfigAsCjs --environment entry:bundle",
     "prebuild:executable": "rollup -c --bundleConfigAsCjs --environment entry:executable",
