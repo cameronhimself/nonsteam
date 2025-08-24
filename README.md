@@ -25,6 +25,8 @@ Otherwise, you can download a precompiled binary from the [latest release](https
 
 ### Basic usage
 
+⚠️ **IMPORTANT** ⚠️  Steam will not pick up changes to non-Steam games while running. Be sure to restart Steam after making any changes. 
+
 You can run `nonsteam help` to see a list of available commands, and `nonsteam help <command>` to get more details.
 
 ```sh
