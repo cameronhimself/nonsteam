@@ -1,5 +1,5 @@
-![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/cameronhimself/nonsteam/latest/total)
-![NPM Downloads](https://img.shields.io/npm/dw/nonsteam)
+[![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/cameronhimself/nonsteam/latest/total)](https://github.com/cameronhimself/nonsteam/releases)
+[![NPM Downloads](https://img.shields.io/npm/dw/nonsteam)](https://www.npmjs.com/package/nonsteam)
 
 ### ⚠️ NOTICE: `nonsteam` is beta software! ⚠️
 

@@ -25,22 +25,22 @@ The logo that is overlaid onto the hero image in the example above. It's usually
 
 The logo can also have its position modified by right-clicking and selecting "Adjust Logo Position". I don't know where this config value is stored or how to update it by hand.
 
-## Cover
+## Grid
 ![Steam grid](images/grid_grid.png)
 - **Dimensions**: 600x900
 - **File location**: `{steam_dir}/userdata/{user_id}/config/grid/{game_id}p.{ext}`
 - **UI update method**: In desktop mode, right-click the cover and select "Manage -> "Set custom artwork"
 - **Manual update method**: Replace/modify the file
-- **`nonsteam` update method**: `nonsteam edit --image-cover <file>`
+- **`nonsteam` update method**: `nonsteam edit --image-grid <file>`
 
 The vertical card image used for game grids like "Recent Games", as in Cauldron above.
 
-## Banner
+## Grid horizontal
 - **Dimensions**: 600x900
 - **File location**: `{steam_dir}/userdata/{user_id}/config/grid/{game_id}p.{ext}`
 - **UI update method**: In desktop mode, right-click the banner and select "Manage -> "Set custom artwork"
 - **Manual update method**: Replace/modify the file
-- **`nonsteam` update method**: `nonsteam edit --image-banner <file>`
+- **`nonsteam` update method**: `nonsteam edit --image-grid-horiz <file>`
 
 Not to be confused with the hero. The horizontal version of the cover, as in Balatro above. This is used to accentuate the first item in a game grid, e.g. the latest game in "Recent Games" and the most popular game in "Play Next".
 
@@ -53,8 +53,8 @@ Not to be confused with the hero. The horizontal version of the cover, as in Bal
 
 ![Steam icon](images/grid_icon.png)
 
-The icon in the desktop library game list. Not used in big picture, as far as I can tell.
+The icon in the desktop library game list. Not used in Big Picture, as far as I can tell.
 
 This one is special, since it's the only image whose path is stored in `shortcuts.vdf`. When you set an icon image through Steam, it will copy that image to the conventional location and modify `shortcuts.vdf` to point to it, if it's not already set.
 
-For the most part, you can treat this image like the others. Using `nonsteam edit --image-icon <file>` will put the image in the conventional location and update `shortcuts.vdf` to point to it. Unless you're doing something esoteric, this is the only command you should need. To only modify the value in `shortcuts.vdf`, us `nonsteam --icon <file>`.
+For the most part, you can treat this image like the others. Using `nonsteam edit --image-icon <file>` will, as Steam does, put the image in the conventional location and update `shortcuts.vdf` to point to it. Unless you're doing something esoteric, this is the only command you should need. To only modify the value in `shortcuts.vdf`, us `nonsteam --icon <file>`.
