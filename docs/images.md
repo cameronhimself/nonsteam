@@ -1,6 +1,6 @@
 # Images
 
-There are five different images that Steam uses for games. The hero, logo, cover, and banner images are all defined by a conventional location in the filesystem and, to my knowledge, the path where Steam looks for them can't be changed. However, the icon image path is stored in `shortcuts.vdf`.
+There are five different images that Steam uses for games. The hero, logo, grid, and horizontal grid images are all defined by a conventional location in the filesystem and, to my knowledge, the path where Steam looks for them can't be changed. However, the icon image path is stored in `shortcuts.vdf`.
 
 Steam supports multiple image formats--at the very least, png and jpg. I'm not sure how Steam decides which image to use if there are multiple matches, e.g. `1234567890_hero.png` and `1234567890_hero.jpg`. As such, when using `nonsteam` to update images, it will erase all matching images and replace them with the one specified.
 
@@ -29,7 +29,7 @@ The logo can also have its position modified by right-clicking and selecting "Ad
 ![Steam grid](images/grid_grid.png)
 - **Dimensions**: 600x900
 - **File location**: `{steam_dir}/userdata/{user_id}/config/grid/{game_id}p.{ext}`
-- **UI update method**: In desktop mode, right-click the cover and select "Manage -> "Set custom artwork"
+- **UI update method**: In desktop mode, right-click the image and select "Manage -> "Set custom artwork"
 - **Manual update method**: Replace/modify the file
 - **`nonsteam` update method**: `nonsteam edit --image-grid <file>`
 
@@ -37,8 +37,8 @@ The vertical card image used for game grids like "Recent Games", as in Cauldron 
 
 ## Grid horizontal
 - **Dimensions**: 600x900
-- **File location**: `{steam_dir}/userdata/{user_id}/config/grid/{game_id}p.{ext}`
-- **UI update method**: In desktop mode, right-click the banner and select "Manage -> "Set custom artwork"
+- **File location**: `{steam_dir}/userdata/{user_id}/config/grid/{game_id}.{ext}`
+- **UI update method**: In desktop mode, right-click the image and select "Manage -> "Set custom artwork"
 - **Manual update method**: Replace/modify the file
 - **`nonsteam` update method**: `nonsteam edit --image-grid-horiz <file>`
 
@@ -46,7 +46,7 @@ Not to be confused with the hero. The horizontal version of the cover, as in Bal
 
 ## Icon
 - **Dimensions**: 256x256
-- **File location**: variable, but by conventional `{steam_dir}/userdata/{user_id}/config/grid/{game_id}_icon.{ext}`
+- **File location**: variable, but by convention `{steam_dir}/userdata/{user_id}/config/grid/{game_id}_icon.{ext}`
 - **UI update method**: Only available for non-Steam games, to my knowledge. Right-click, "Properties" -> "Shortcut" -> click icon
 - **Manual update method**: Replace/modify the file, or modify `shortcuts.vdf` to point to a new file location
 - **`nonsteam` update method**: To modify the entry in `shortcuts.vdf`, use `nonsteam edit --icon <file>`. To replace the file in its conventional location, use `nonsteam edit --image-icon <file>`
@@ -57,4 +57,4 @@ The icon in the desktop library game list. Not used in Big Picture, as far as I 
 
 This one is special, since it's the only image whose path is stored in `shortcuts.vdf`. When you set an icon image through Steam, it will copy that image to the conventional location and modify `shortcuts.vdf` to point to it, if it's not already set.
 
-For the most part, you can treat this image like the others. Using `nonsteam edit --image-icon <file>` will, as Steam does, put the image in the conventional location and update `shortcuts.vdf` to point to it. Unless you're doing something esoteric, this is the only command you should need. To only modify the value in `shortcuts.vdf`, us `nonsteam --icon <file>`.
+For the most part, you can treat this image like the others when interacting with it with `nonsteam`. Using `nonsteam edit --image-icon <file>` will, as Steam does, put the image in the conventional location and update `shortcuts.vdf` to point to it. Unless you're doing something esoteric, this is the only command you should need. To only modify the value in `shortcuts.vdf`, us `nonsteam --icon <file>`.
