@@ -1,5 +1,5 @@
 import { Argument, Option } from "commander";
-import { ConfigOption, FieldValueOption } from "./classes";
+import { ConfigOption, FieldValueOption, ImageOption } from "./classes";
 import { asAppId, asAppIds, asBoolean, asDate, asInt, msg } from "./utils";
 
 export const appIdArgument = new Argument("<appid>",
@@ -45,6 +45,19 @@ export const saveOpts: Array<Option> = [
   ])),
 ];
 
+export const imageOpts: Array<Option> = [
+  new ImageOption("--image-grid <image>",
+    "The vertical grid image. Can be either a local file path or a URL."),
+  new ImageOption("--image-grid-horiz <image>",
+    "The horizontal grid image. Can be either a local file path or a URL."),
+  new ImageOption("--image-icon <image>",
+    "The small game icon. Can be either a local file path or a URL. Note that this will also set --icon."),
+  new ImageOption("--image-hero <image>",
+    "The banner image at the top of the game detail page. Can be either a local file path or a URL."),
+  new ImageOption("--image-logo <image>",
+    "The logo that's overlaid on top of the hero. Can be either a local file path or a URL."),
+];
+
 export const fieldValueOpts: Array<Option> = [
   new FieldValueOption("--app-id <id>", msg([
     "The 10-digit app ID of the non-Steam game/program. If this isn't provided",
@@ -57,9 +70,12 @@ export const fieldValueOpts: Array<Option> = [
     "The working directory of the app.",
     "This will typically be the parent path of the --exe option.",
   ])),
-  new FieldValueOption("--icon <path>", "The path to the app's icon."),
+  new FieldValueOption("--icon <path>", msg([
+    "The path to the app's icon. Overridden by --image-icon, which is the",
+    "option you should probably be using instead unless you know what you're doing.",
+  ])),
   new FieldValueOption("--shortcut-path <path>", "unknown"),
-  new FieldValueOption("--launch-options <options>", `e.g., 'ENV_VAR="value" %command%'`),
+  new FieldValueOption("--launch-options <options>", `e.g., 'ENV_VAR="value" %command%' or '--verbose'`),
   new FieldValueOption("--is-hidden [flag]", "Whether this game is visible in steam.").argParser(asBoolean),
   new FieldValueOption("--allow-overlay [flag]",
     "Whether to permit opening the Steam overlay while in-game."
@@ -69,7 +85,7 @@ export const fieldValueOpts: Array<Option> = [
     "Whether this game should be included in your VR library."
   ).argParser(asBoolean),
   new FieldValueOption("--devkit [flag]", "boolean flag, purpose unknown").argParser(asBoolean),
-  new FieldValueOption("--devkit-game-id <id>", "numberic ID, purpose unknown"),
+  new FieldValueOption("--devkit-game-id <id>", "numeric ID, purpose unknown"),
   new FieldValueOption("--devkit-override-app-id <id>", "string ID, purpose unknown").argParser(asInt),
   new FieldValueOption("--last-play-time <timestamp>", msg([
     "The last time this game was played.",
@@ -86,10 +102,4 @@ export const fieldValueOpts: Array<Option> = [
 
 export const writeOpts: Array<Option> = [
   ...saveOpts,
-  // new ConfigOption("--json <json>",
-  //   "A JSON string to read values from."
-  // ).conflicts(fieldValueOpts.map(opt => opt.attributeName())),
-  // new ConfigOption("--json-file <path>",
-  //   "A JSON file to read values from."
-  // ).conflicts(fieldValueOpts.map(opt => opt.attributeName())),
 ];

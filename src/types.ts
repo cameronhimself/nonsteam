@@ -83,3 +83,5 @@ export type TypeFromKey<TKey extends SteamFieldKey> =
   TKey extends "FlatpakAppID" ? string :
   TKey extends "tags" ? Array<string> :
   never;
+
+export type ImageKind = "icon" | "hero" | "logo" | "gridVert" | "gridHoriz";

@@ -3,7 +3,7 @@ import { SteamFieldKey } from "./types";
 import { promisified as regedit } from "regedit";
 import fs from "fs";
 import os from "os";
-import path from "path";
+import path, { dirname } from "path";
 
 function isPrintable(str: string) {
   return /^[\x20-\x7F]*$/.test(str);
@@ -44,53 +44,90 @@ export const findIndexOfBufferInBuffer = (haystack: Buffer, needle: Buffer): num
   });
 };
 
-export const findShortcutsFile = async (): Promise<[boolean, string, Array<string>] | [false, undefined, Array<string>]> => {
+type UserInfo = {
+  id: string;
+  paths: {
+    userdata: string;
+    config: string;
+    shortcuts: string;
+    grid: string;
+  }
+};
+
+type InstallInfo = {
+  path: string;
+  isWindows: boolean;
+  searchPaths: Array<string>;
+  users: Array<UserInfo>;
+}
+
+export const getSteamInstallInfo = async (): Promise<InstallInfo | null> => {
+  let steamPath = "";
+  const userIds: Array<string> = [];
+  const searchPaths: Array<string> = [];
+  let isWindows = false;
   if (os.platform() === "win32") {
+    isWindows = true;
     const steamUsersKey = String.raw`HKCU\SOFTWARE\Valve\Steam\Users`;
     const steamPathKey = String.raw`HKCU\SOFTWARE\Valve\Steam`;
 
     const records = await regedit.list([steamUsersKey, steamPathKey]);
-    const userId = records[steamUsersKey].keys[0] as string;
-    const steamPath = records[steamPathKey].values.SteamPath?.value as string;
-
-    if (!userId || !steamPath) {
-      return [false, undefined, []];
+    userIds.push(...records[steamUsersKey].keys[0]);
+    steamPath = records[steamPathKey].values.SteamPath?.value as string;
+    searchPaths.push(...(steamPath ? [steamPath] : []));
+  } else {
+    searchPaths.push(...[
+      path.resolve(os.homedir(), ".steam/steam"),
+      path.resolve(os.homedir(), ".local/share/Steam"),
+      path.resolve(os.homedir(), "snap/steam"),
+      path.resolve(os.homedir(), ".var/app/com.valvesoftware.Steam/.steam/steam"),
+    ]);
+    const usersPath = searchPaths.map(p => path.resolve(p, "userdata")).find(fs.existsSync);
+    if (!usersPath) {
+      return null;
     }
-
-    const fullPathDir = path.resolve(steamPath, "userdata", userId, "config");
-    const fullPath = path.resolve(fullPathDir, "shortcuts.vdf")
-    if (fs.existsSync(fullPathDir)) {
-      return [fs.existsSync(fullPath), fullPath, [fullPath]];
-    }
-    return [false, undefined, [fullPath]];
-  }
-  const searchPaths = [
-    path.resolve(os.homedir(), ".steam/steam"),
-    path.resolve(os.homedir(), ".local/share/Steam"),
-    path.resolve(os.homedir(), "snap/steam"),
-    path.resolve(os.homedir(), ".var/app/com.valvesoftware.Steam/.steam/steam"),
-  ];
-  const usersPath = searchPaths.map(p => path.resolve(p, "userdata")).find(fs.existsSync);
-  if (!usersPath) {
-    return [false, undefined, searchPaths];
+    steamPath = dirname(usersPath);
+    const usersFiles = fs.readdirSync(usersPath);
+    userIds.push(...(usersFiles
+      .filter(filename => /^\d+$/.test(filename))
+      .map(filename => path.resolve(usersPath, filename))
+      .filter(fullPath => fs.lstatSync(fullPath).isDirectory())
+    ))
   }
 
-  const userDirs: Array<string> = [];
-  try {
-    fs.readdirSync(usersPath).forEach(dir => userDirs.push(dir));
-  } catch {
-    // continue regardless of error
-  }
-  if (!userDirs.length) {
-    return [false, undefined, searchPaths];
+  if (!steamPath) {
+    return null
   }
 
-  const fullPathDir = path.resolve(usersPath, userDirs[0], "config");
-  const fullPath = path.resolve(fullPathDir, "shortcuts.vdf");
-  if (fs.existsSync(fullPathDir)) {
-    return [fs.existsSync(fullPath), fullPath, searchPaths];
+  return {
+    path: steamPath,
+    searchPaths,
+    isWindows,
+    users: userIds.map(userId => ({
+      id: userId,
+      paths: {
+        userdata: path.resolve(steamPath, "userdata", userId),
+        get config() {
+          return path.resolve(this.userdata, "config");
+        },
+        get shortcuts() {
+          return path.resolve(this.config, "shortcuts.vdf");
+        },
+        get grid() {
+          return path.resolve(this.config, "grid");
+        },
+      }
+    }))
   }
-  return [false, undefined, searchPaths];
+};
+
+export const findShortcutsFile = async (): Promise<[boolean, string, Array<string>] | [false, undefined, Array<string>]> => {
+  const installInfo = await getSteamInstallInfo();
+  const shortcuts = installInfo?.users[0]?.paths.shortcuts;
+  if (shortcuts) {
+    return [fs.existsSync(shortcuts), shortcuts, installInfo.searchPaths];
+  }
+  return [false, undefined, installInfo?.searchPaths || []];
 };
 
 export const getGenericFieldBuffer = (buf: Buffer, key: string, type: "string" | "number" | "stringArray") => {

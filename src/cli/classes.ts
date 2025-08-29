@@ -24,6 +24,13 @@ export class FieldValueOption extends GroupedOption {
   }
 }
 
+export class ImageOption extends GroupedOption {
+  constructor(flags: string, description?: string) {
+    super(flags, description);
+    this.group("Image Options");
+  }
+}
+
 export class ConfigOption extends GroupedOption {}
 
 export class GroupedOptionsHelp extends Help {

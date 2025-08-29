@@ -5,12 +5,13 @@ import {
   saveOpts,
   appIdsArgument,
   appIdArgument,
+  imageOpts,
 } from "./options";
 import { Command } from "./classes";
 import { Argument, Command as BaseCommand, Option } from "commander";
-import { log, getEntries, getShortcuts, msg, prettyValue, generateUniqueAppId, asInt, Verbosity, getEnvConfig } from "./utils";
-import { EntryObject } from "../types";
-import { Entry, IEntry, Shortcuts } from "../classes";
+import { log, msg, prettyValue, generateUniqueAppId, asInt, Verbosity, getEnvConfig } from "./utils";
+import { EntryObject, ImageKind } from "../types";
+import { Entry, IEntry, NonSteam } from "../classes";
 import chalk from "chalk";
 import path from "path";
 import { BLANK_ENTRY } from "../constants";
@@ -52,6 +53,16 @@ const dryRun = (outputPath: string, entry: IEntry, opts: IEntry, preamble: strin
   console.log(`{\n${lines.map(line => `  ${line}`).join("\n")}\n}`);
 };
 
+const getImageValues = (opts: WriteOptions): Partial<Record<ImageKind, string | undefined>> => {
+  return Object.fromEntries(Object.entries({
+    gridVert: opts.imageGrid,
+    gridHoriz: opts.imageGridHoriz,
+    icon: opts.imageIcon,
+    hero: opts.imageHero,
+    logo: opts.imageLogo,
+  }).filter(([_, v]) => Boolean(v)));
+};
+
 program
   .name('nonsteam')
   .description('CLI for manipulating your non-Steam game entries')
@@ -68,10 +79,25 @@ program
     }
   });
 
-type GetOpts = {
+type GetOptions = {
   input: string;
   details: boolean;
   asJson: boolean;
+};
+
+type WriteOptions = IEntry & {
+  input?: string;
+  output?: string;
+  overwrite: boolean;
+  dryRun?: boolean;
+  json?: string;
+  jsonFile?: string;
+
+  imageGrid?: string;
+  imageGridHoriz?: string;
+  imageIcon?: string;
+  imageHero?: string;
+  imageLogo?: string;
 };
 
 program.addCommand(new Command('get')
@@ -80,11 +106,13 @@ program.addCommand(new Command('get')
   .addArgument(appIdsArgument)
   .option("-d, --details", "Display full details for each entry.")
   .option("-j, --as-json", "Format output as JSON. Implies --details.")
-  .action(async (appIds: Array<number | string>, opts: GetOpts) => {
+  .action(async (appIds: Array<number | string>, opts: GetOptions) => {
     const { input } = getEnvConfig(opts);
     let entries: Array<EntryObject>;
+    let nonsteam: NonSteam;
     try {
-      entries = (await getEntries(input))
+      nonsteam = await NonSteam.load(input);
+      entries = nonsteam.shortcuts.toObject()
         .filter(entry => appIds.length ? appIds.includes(entry.appid) : true)
     } catch(err) {
       log.error((err as Error).message);
@@ -111,20 +139,12 @@ program.addCommand(new Command('get')
   }
 ));
 
-type WriteOptions = IEntry & {
-  input?: string;
-  output?: string;
-  overwrite: boolean;
-  dryRun?: boolean;
-  json?: string;
-  jsonFile?: string;
-}
-
 program.addCommand(new Command('add')
   .description('Add a non-Steam game entry.')
   .addOptions(commonOpts)
   .addOptions(writeOpts)
   .addOptions(fieldValueOpts)
+  .addOptions(imageOpts)
   .action(async (opts: WriteOptions) => {
     const { overwrite, input } = getEnvConfig(opts);
     if (!overwrite && !opts.output) {
@@ -135,20 +155,20 @@ program.addCommand(new Command('add')
       return;
     }
 
-    let shortcuts: Shortcuts;
+    let nonsteam: NonSteam;
     try {
-      shortcuts = await getShortcuts(input);
+      nonsteam = await NonSteam.load(input);
     } catch(err) {
       log.error((err as Error).message);
       return;
     }
 
     const outputPath: string = overwrite
-      ? shortcuts.loadedPath!
+      ? nonsteam.shortcuts.loadedPath!
       : path.resolve(process.cwd(), opts.output!);
 
-    opts.appId = opts.appId || generateUniqueAppId(shortcuts);
-    if (shortcuts.getEntry(opts.appId)) {
+    opts.appId = opts.appId || generateUniqueAppId(nonsteam.shortcuts);
+    if (nonsteam.getEntry(opts.appId)) {
       log.error([
         `Entry already exists for ID ${opts.appId}.`,
         `Use 'nonsteam edit ${opts.appId} [options]' to edit it instead.`,
@@ -161,11 +181,14 @@ program.addCommand(new Command('add')
     if (opts.dryRun) {
       dryRun(outputPath, entry, opts, "Would write the following new entry")
       return;
-    } 
+    }
     log.info(`Saving to ${outputPath}...`);
     entry.setValues(opts);
-    shortcuts.addEntry(entry);
-    shortcuts.save(outputPath);
+    await Promise.all(Object.entries(getImageValues(opts)).map(async ([imageKind, image]) =>
+      nonsteam.setImage(entry.appId, imageKind as ImageKind, image)
+    ));
+    nonsteam.addEntry(entry);
+    nonsteam.save(outputPath);
   }
 ));
 
@@ -175,6 +198,7 @@ program.addCommand(new Command('edit')
   .addOptions(commonOpts)
   .addOptions(writeOpts)
   .addOptions(fieldValueOpts)
+  .addOptions(imageOpts)
   .action(async (appId: number, opts: WriteOptions) => {
     const { overwrite, input } = getEnvConfig(opts);
     if (!overwrite && !opts.output) {
@@ -185,21 +209,21 @@ program.addCommand(new Command('edit')
       return;
     }
 
-    let shortcuts: Shortcuts;
+    let nonsteam: NonSteam;
     try {
-      shortcuts = await getShortcuts(input);
+      nonsteam = await NonSteam.load(input)
     } catch(err) {
       log.error((err as Error).message);
       return;
     }
-    const entry = shortcuts.getEntry(appId);
+    const entry = nonsteam.getEntry(appId);
     if (!entry) {
       log.error(`Entry '${appId}' not found.`);
       return;
     }
 
     const outputPath: string = overwrite
-      ? shortcuts.loadedPath!
+      ? nonsteam.shortcuts.loadedPath!
       : path.resolve(process.cwd(), opts.output!);
 
     if (opts.dryRun) {
@@ -207,8 +231,11 @@ program.addCommand(new Command('edit')
       return;
     } else {
       entry.setValues(opts);
+      await Promise.all(Object.entries(getImageValues(opts)).map(([imageKind, image]) =>
+        nonsteam.setImage(entry.appId, imageKind as ImageKind, image)
+      ));
       log.info(`Saving to ${outputPath}...`);
-      shortcuts.save(outputPath);
+      await nonsteam.save(outputPath);
     }
   }
 ));
@@ -228,22 +255,22 @@ program.addCommand(new Command("delete")
       return;
     }
 
-    let shortcuts: Shortcuts;
+    let nonsteam: NonSteam;
     try {
-      shortcuts = await getShortcuts(input);
+      nonsteam = await NonSteam.load(input);
     } catch(err) {
       log.error((err as Error).message);
       return;
     }
 
-    const entry = shortcuts.getEntry(appId);
+    const entry = nonsteam.getEntry(appId);
     if (!entry) {
       log.error(`Entry '${appId}' not found.`);
       return;
     }
 
     const outputPath: string = overwrite
-      ? shortcuts.loadedPath!
+      ? nonsteam.shortcuts.loadedPath!
       : path.resolve(process.cwd(), opts.output!);
 
     if (opts.dryRun) {
@@ -253,9 +280,9 @@ program.addCommand(new Command("delete")
       ))
       return;
     } else {
-      shortcuts.deleteEntry(appId);
+      nonsteam.deleteEntry(appId);
       log.info(`Saving to ${outputPath}...`);
-      await shortcuts.save(outputPath);
+      await nonsteam.save(outputPath);
     }
   }
 ));

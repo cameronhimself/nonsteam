@@ -25,6 +25,8 @@ Otherwise, you can download a precompiled binary from the [latest release](https
 
 ### Basic usage
 
+⚠️ **IMPORTANT**: Steam will not pickup changes to its non-Steam games database while it's running. You're advised to close Steam before making changes, or restart Steam immediately after.
+
 You can run `nonsteam help` to see a list of available commands, and `nonsteam help <command>` to get more details.
 
 ```sh
@@ -48,7 +50,6 @@ appid: 2502275492
 
 # modify an existing game
 $ nonsteam edit 2502275492 -w \
-  --icon "c:\path\to\my\icon.png" \
   --allow-overlay \
   --is-hidden false
 
@@ -56,18 +57,28 @@ $ nonsteam edit 2502275492 -w \
 
 # add a new non-Steam game
 $ nonsteam add -w \
-  --app-name "My App" \
-  --exe '"c:\program files\my app\my app.exe"' \
-  --start-dir '"c:\program files\my app\"' \
+  --app-name "Dungeon Crawl Stone Soup" \
+  --exe '"c:\program files\crawl\crawl.exe"' \
+  --start-dir '"c:\program files\crawl\"' \
   --allow-overlay
 
 ... Added app with ID: 4148342750
+
+# add images. can also use local file paths
+nonsteam edit -w 4148342750 \
+  --image-icon "https://cdn2.steamgriddb.com/icon/4b7a55505729b7f664e7222960e9c2d5.ico" \
+  --image-grid "https://cdn2.steamgriddb.com/grid/8e26736829e07acb465bc6eacbf2ed1f.png" \
+  --image-grid-horiz "https://cdn2.steamgriddb.com/grid/66f041e16a60928b05a7e228a89c3799.png" \
+  --image-hero "https://cdn2.steamgriddb.com/hero/03ed6c135c5912cf3bd6060f43ededf1.png" \
+  --image-logo "https://cdn2.steamgriddb.com/logo/7d08c3cfc1bc6c0ca31c8fa6d89aa0f1.png"
 
 # remove a non-Steam game
 $ nonsteam delete -w 4148342750
 
 ... Deleted app with ID: 4148342750
 ```
+
+For more information regarding the images that Steam uses, take a look [here](docs/images.md).
 
 ### Fields for non-Steam games
 
