@@ -143,7 +143,7 @@ export class StringArrayPrimitiveField<TKey extends SteamFieldStringArrayPrimiti
   public toBuffer() {
     return bufferFromMixed(
       NUL, this.key, NUL,
-      ...this.primitiveValue.map((s, i) => bufferFromMixed(SOH, i, NUL, s, NUL))
+      ...this.primitiveValue.map((s, i) => bufferFromMixed(SOH, `${i}`, NUL, s, NUL))
     );
   }
 }

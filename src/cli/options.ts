@@ -104,7 +104,29 @@ export const fieldValueOpts: Array<Option> = [
   new FieldValueOption("--tags <tags>", msg([
     "Comma-separated list of tags. Commas in tags can be escaped with a",
     "backslash, e.g. 'weird\\,tag,tag2,tag3'",
-  ]))
+  ])).argParser((input: string) => {
+    const result: Array<string> = [];
+    let current = "";
+    let escaping = false;
+
+    for (let i = 0; i < input.length; i++) {
+      const char = input[i];
+      if (escaping) {
+        current += char;
+        escaping = false;
+      } else if (char === '\\') {
+        escaping = true;
+      } else if (char === ',') {
+        result.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+
+    result.push(current);
+    return result;
+  })
 ];
 
 export const writeOpts: Array<Option> = [
