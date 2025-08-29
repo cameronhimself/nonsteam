@@ -9,6 +9,7 @@ import {
 } from "./options";
 import { Command } from "./classes";
 import { Argument, Command as BaseCommand, Option } from "commander";
+import SGDB, { SGDBImageOptions } from "steamgriddb";
 import { log, msg, prettyValue, generateUniqueAppId, asInt, Verbosity, getEnvConfig } from "./utils";
 import { EntryObject, ImageKind } from "../types";
 import { Entry, IEntry, NonSteam } from "../classes";
@@ -19,6 +20,33 @@ import { ENV_OPTION_INPUT_KEY, ENV_OPTION_OVERWRITE_KEY } from "./constants";
 import { version } from "../../package.json";
 
 const program = new BaseCommand();
+
+// intentionally committed
+const sgdb = new SGDB(atob("NjFhNWI0Yjc1NWRjZDEwMDM4ZTQwNDIxOGQ5MDU2YWE="));
+
+type ImageSourceMap = Partial<Record<ImageKind, string>>;
+
+type GetOptions = {
+  input: string;
+  details: boolean;
+  asJson: boolean;
+};
+
+type WriteOptions = IEntry & {
+  input?: string;
+  output?: string;
+  overwrite: boolean;
+  dryRun?: boolean;
+  json?: string;
+  jsonFile?: string;
+
+  imageGrid?: string;
+  imageGridHoriz?: string;
+  imageIcon?: string;
+  imageHero?: string;
+  imageLogo?: string;
+  sgdbId?: number;
+};
 
 const entryToLog = (entry: EntryObject): string => {
   const lines = [`appid: ${entry.appid}`];
@@ -53,14 +81,45 @@ const dryRun = (outputPath: string, entry: IEntry, opts: IEntry, preamble: strin
   console.log(`{\n${lines.map(line => `  ${line}`).join("\n")}\n}`);
 };
 
-const getImageValues = (opts: WriteOptions): Partial<Record<ImageKind, string | undefined>> => {
+const getSgdbImageUrls = async (sgdbId: number): Promise<ImageSourceMap> => {
+  const sgdbQuery: SGDBImageOptions = { type: "game", id: sgdbId };
+
+  const [grids, heroes, logos, icons] = await Promise.all([
+    sgdb.getGrids(sgdbQuery),
+    sgdb.getHeroes(sgdbQuery),
+    sgdb.getLogos(sgdbQuery),
+    sgdb.getIcons(sgdbQuery),
+  ]);
+
+  [grids, heroes, logos, icons].forEach(items => items.sort((a, b) => {
+    if (a.style.includes("alternate") || a.style.includes("official")) {
+      return -1;
+    }
+    return 0;
+  }));
+  const vertGrids = grids.filter((grid) => grid.width < grid.height);
+  const horizGrids = grids.filter((grid) => grid.width > grid.height);
+
   return Object.fromEntries(Object.entries({
+    gridHoriz: horizGrids[0] && horizGrids[0].url.toString(),
+    gridVert: vertGrids[0] && vertGrids[0].url.toString(),
+    hero: heroes[0] && heroes[0].url.toString(),
+    logo: logos[0] && logos[0].url.toString(),
+    icon: icons[0] && icons[0].url.toString(),
+  }).filter(([_, v]) => Boolean(v)));
+}
+
+const getImageValues = async (opts: WriteOptions): Promise<ImageSourceMap> => {
+  let sgdbImages: ImageSourceMap = opts.sgdbId ? await getSgdbImageUrls(opts.sgdbId) : {};
+  const optImages: ImageSourceMap = Object.fromEntries(Object.entries({
     gridVert: opts.imageGrid,
     gridHoriz: opts.imageGridHoriz,
     icon: opts.imageIcon,
     hero: opts.imageHero,
     logo: opts.imageLogo,
   }).filter(([_, v]) => Boolean(v)));
+
+  return { ...sgdbImages, ...optImages };
 };
 
 program
@@ -78,27 +137,6 @@ program
       log.verbosity = Verbosity.Quiet;
     }
   });
-
-type GetOptions = {
-  input: string;
-  details: boolean;
-  asJson: boolean;
-};
-
-type WriteOptions = IEntry & {
-  input?: string;
-  output?: string;
-  overwrite: boolean;
-  dryRun?: boolean;
-  json?: string;
-  jsonFile?: string;
-
-  imageGrid?: string;
-  imageGridHoriz?: string;
-  imageIcon?: string;
-  imageHero?: string;
-  imageLogo?: string;
-};
 
 program.addCommand(new Command('get')
   .description("Get information about one or more non-Steam game entries.")
@@ -136,8 +174,8 @@ program.addCommand(new Command('get')
         console.log("");
       }
     }
-  }
-));
+  })
+);
 
 program.addCommand(new Command('add')
   .description('Add a non-Steam game entry.')
@@ -184,7 +222,7 @@ program.addCommand(new Command('add')
     }
     log.info(`Saving to ${outputPath}...`);
     entry.setValues(opts);
-    await Promise.all(Object.entries(getImageValues(opts)).map(async ([imageKind, image]) =>
+    await Promise.all(Object.entries(await getImageValues(opts)).map(async ([imageKind, image]) =>
       nonsteam.setImage(entry.appId, imageKind as ImageKind, image)
     ));
     nonsteam.addEntry(entry);
@@ -231,7 +269,7 @@ program.addCommand(new Command('edit')
       return;
     } else {
       entry.setValues(opts);
-      await Promise.all(Object.entries(getImageValues(opts)).map(([imageKind, image]) =>
+      await Promise.all(Object.entries(await getImageValues(opts)).map(([imageKind, image]) =>
         nonsteam.setImage(entry.appId, imageKind as ImageKind, image)
       ));
       log.info(`Saving to ${outputPath}...`);

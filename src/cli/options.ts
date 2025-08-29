@@ -56,6 +56,13 @@ export const imageOpts: Array<Option> = [
     "The banner image at the top of the game detail page. Can be either a local file path or a URL."),
   new ImageOption("--image-logo <image>",
     "The logo that's overlaid on top of the hero. Can be either a local file path or a URL."),
+  new ImageOption("--sgdb-id <id>", msg(
+    ["The steamgriddb.com ID number. Rather than passing each image URL/path manually,",
+    "you can use this option to try to pull all five images automatically from SGDB."],
+    "",
+    ["Note that any image passed explicitly with one of the `--image-*` options will take precedence over",
+    "this option. This allows you to make overrides if any of the images aren't to your taste."],
+  )).argParser(asInt),
 ];
 
 export const fieldValueOpts: Array<Option> = [
