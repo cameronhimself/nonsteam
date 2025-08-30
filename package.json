@@ -24,7 +24,7 @@
     "prepack": "npm run clean:bundle && npm run build:bundle",
     "test:file": "mocha -r tsx",
     "nonsteam": "tsx src/cli/index.ts",
-    "release": "npx release-it",
+    "release": "npx release-it --ci",
     "test": "npm run test:file src/**/*.test.ts src/*.test.ts"
   },
   "devDependencies": {

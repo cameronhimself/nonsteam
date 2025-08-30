@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs/promises";
 import { file as tmpFile, dir as tmpDir } from "tmp-promise";
 import { ImageKind } from "../types";
+import { mkdirp } from "mkdirp";
 
 const imageSuffixMap: Record<ImageKind, string> = {
   hero: "_hero",
@@ -122,6 +123,7 @@ export class NonSteam {
     if (!userInfo) {
       return this;
     }
+    await mkdirp(userInfo.paths.grid);
     const newImageNames = Object.values(this._newImages)
       .map(({ destPath }) => destPath)
       .map(p => path.parse(p).name)
