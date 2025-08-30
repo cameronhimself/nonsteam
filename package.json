@@ -1,6 +1,6 @@
 {
   "name": "nonsteam",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "A tool and library for viewing and editing your non-Steam game entries from the command line or with code.",
   "license": "ISC",
   "author": "J. Cameron McDonald",
