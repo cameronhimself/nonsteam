@@ -29,14 +29,16 @@ Otherwise, you can download a precompiled binary from the [latest release](https
 
 You can run `nonsteam help` to see a list of available commands, and `nonsteam help <command>` to get more details.
 
+#### List all non-Steam games
 ```sh
-# list all non-Steam games
 $ nonsteam get
 
 2502275492: GOG Galaxy
 3733884208: Dolphin
+```
 
-# get detailed information about one (or more) games
+#### Get detailed information about one (or more) games
+```sh
 $ nonsteam get 2502275492 --details
 
 appid: 2502275492
@@ -47,15 +49,19 @@ appid: 2502275492
   ShortcutPath: ''
   LaunchOptions: 'SOME_ENV_VAR="foo" %command%'
   ...
+```
 
-# modify an existing game
+#### Modify an existing game
+```sh
 $ nonsteam edit 2502275492 -w \
   --allow-overlay \
   --is-hidden false
 
 ... Updated app with ID: 2502275492
+```
 
-# add a new non-Steam game
+#### Add a new non-Steam game
+```sh
 $ nonsteam add -w \
   --app-name "Dungeon Crawl Stone Soup" \
   --exe '"c:\program files\crawl\crawl.exe"' \
@@ -63,25 +69,33 @@ $ nonsteam add -w \
   --allow-overlay
 
 ... Added app with ID: 4148342750
+```
 
-# add images from URLs or local file paths
+#### Add images from URLs or local file paths
+```sh
 nonsteam edit -w 4148342750 \
   --image-icon "my_icon.png" \
   --image-grid "https://cdn2.steamgriddb.com/grid/8e26736829e07acb465bc6eacbf2ed1f.png" \
   --image-grid-horiz "https://cdn2.steamgriddb.com/grid/66f041e16a60928b05a7e228a89c3799.png" \
   --image-hero "https://cdn2.steamgriddb.com/hero/03ed6c135c5912cf3bd6060f43ededf1.png" \
   --image-logo "https://cdn2.steamgriddb.com/logo/7d08c3cfc1bc6c0ca31c8fa6d89aa0f1.png"
+```
 
-# or add images from steamgriddb.com
+#### Add images from steamgriddb.com
+```sh
 nonsteam edit -w 4148342750 --sgdb-id 36334
+```
 
-# or combine both approaches to override SGDB images
+#### Combine both approaches to override SGDB images
+```sh
 nonsteam edit -w 4148342750 \
   --sgdb-id 36334 \
   --image-icon "my_icon.png" \
   --image-grid "https://cdn2.steamgriddb.com/grid/68300e070409b2fe66caf7b80bdb4502.png"
+```
 
-# remove a non-Steam game
+#### Remove a non-Steam game
+```sh
 $ nonsteam delete -w 4148342750
 
 ... Deleted app with ID: 4148342750
