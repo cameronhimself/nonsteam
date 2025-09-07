@@ -64,13 +64,22 @@ $ nonsteam add -w \
 
 ... Added app with ID: 4148342750
 
-# add images. can also use local file paths
+# add images from URLs or local file paths
 nonsteam edit -w 4148342750 \
-  --image-icon "https://cdn2.steamgriddb.com/icon/4b7a55505729b7f664e7222960e9c2d5.ico" \
+  --image-icon "my_icon.png" \
   --image-grid "https://cdn2.steamgriddb.com/grid/8e26736829e07acb465bc6eacbf2ed1f.png" \
   --image-grid-horiz "https://cdn2.steamgriddb.com/grid/66f041e16a60928b05a7e228a89c3799.png" \
   --image-hero "https://cdn2.steamgriddb.com/hero/03ed6c135c5912cf3bd6060f43ededf1.png" \
   --image-logo "https://cdn2.steamgriddb.com/logo/7d08c3cfc1bc6c0ca31c8fa6d89aa0f1.png"
+
+# or add images from steamgriddb.com
+nonsteam edit -w 4148342750 --sgdb-id 36334
+
+# or combine both approaches to override SGDB images
+nonsteam edit -w 4148342750 \
+  --sgdb-id 36334 \
+  --image-icon "my_icon.png" \
+  --image-grid "https://cdn2.steamgriddb.com/grid/68300e070409b2fe66caf7b80bdb4502.png"
 
 # remove a non-Steam game
 $ nonsteam delete -w 4148342750
