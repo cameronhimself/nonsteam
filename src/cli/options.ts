@@ -1,5 +1,5 @@
 import { Argument, Option } from "commander";
-import { ConfigOption, FieldValueOption, ImageOption } from "./classes";
+import { ConfigOption, FieldValueOption, ImageOption, OtherOption } from "./classes";
 import { asAppId, asAppIds, asBoolean, asDate, asInt, msg } from "./utils";
 
 export const appIdArgument = new Argument("<appid>",
@@ -43,6 +43,29 @@ export const saveOpts: Array<Option> = [
     "Show the modifications to be made and the file that they'll be made to,",
     "but don't actually do anything."
   ])),
+];
+
+export const otherOptions: Array<Option> = [
+  new OtherOption("--compatibility-tool-version [version]", msg(
+    "The compatibility tool version to use. At time of writing the known versions are:",
+    "  steamlinuxruntime",
+    "  Proton-stl",
+    "  proton_hotfix",
+    "  proton_experimental",
+    "  proton_10",
+    "  proton_9",
+    "  proton_8",
+    "  proton_7",
+    "  proton_63",
+    "  proton_5",
+    "  proton_513",
+    "  proton_5",
+    "  proton_42",
+    "  proton_411",
+    "  proton_37",
+    "  proton_316",
+    "See https://github.com/[TODO] for more info."
+  ))
 ];
 
 export const imageOpts: Array<Option> = [

@@ -1,6 +1,7 @@
 import {
   fieldValueOpts,
   commonOpts,
+  otherOptions,
   writeOpts,
   saveOpts,
   appIdsArgument,
@@ -46,6 +47,8 @@ type WriteOptions = IEntry & {
   imageHero?: string;
   imageLogo?: string;
   sgdbId?: number;
+
+  compatibilityToolVersion?: string | boolean;
 };
 
 const entryToLog = (entry: EntryObject): string => {
@@ -91,7 +94,7 @@ const getSgdbImageUrls = async (sgdbId: number): Promise<ImageSourceMap> => {
     sgdb.getIcons(sgdbQuery),
   ]);
 
-  [grids, heroes, logos, icons].forEach(items => items.sort((a, b) => {
+  [grids, heroes, logos, icons].forEach(items => items.sort(a => {
     if (a.style.includes("alternate") || a.style.includes("official")) {
       return -1;
     }
@@ -110,7 +113,7 @@ const getSgdbImageUrls = async (sgdbId: number): Promise<ImageSourceMap> => {
 }
 
 const getImageValues = async (opts: WriteOptions): Promise<ImageSourceMap> => {
-  let sgdbImages: ImageSourceMap = opts.sgdbId ? await getSgdbImageUrls(opts.sgdbId) : {};
+  const sgdbImages: ImageSourceMap = opts.sgdbId ? await getSgdbImageUrls(opts.sgdbId) : {};
   const optImages: ImageSourceMap = Object.fromEntries(Object.entries({
     gridVert: opts.imageGrid,
     gridHoriz: opts.imageGridHoriz,
@@ -183,6 +186,7 @@ program.addCommand(new Command('add')
   .addOptions(writeOpts)
   .addOptions(fieldValueOpts)
   .addOptions(imageOpts)
+  .addOptions(otherOptions)
   .action(async (opts: WriteOptions) => {
     const { overwrite, input } = getEnvConfig(opts);
     if (!overwrite && !opts.output) {
@@ -225,6 +229,10 @@ program.addCommand(new Command('add')
     await Promise.all(Object.entries(await getImageValues(opts)).map(async ([imageKind, image]) =>
       nonsteam.setImage(entry.appId, imageKind as ImageKind, image)
     ));
+    if (opts.compatibilityToolVersion) {
+      const version = opts.compatibilityToolVersion === true ? null : opts.compatibilityToolVersion;
+      nonsteam.setCompatibilityToolVersion(entry.appId, version)
+    }
     nonsteam.addEntry(entry);
     nonsteam.save(outputPath);
   }
@@ -237,6 +245,7 @@ program.addCommand(new Command('edit')
   .addOptions(writeOpts)
   .addOptions(fieldValueOpts)
   .addOptions(imageOpts)
+  .addOptions(otherOptions)
   .action(async (appId: number, opts: WriteOptions) => {
     const { overwrite, input } = getEnvConfig(opts);
     if (!overwrite && !opts.output) {
@@ -272,6 +281,10 @@ program.addCommand(new Command('edit')
       await Promise.all(Object.entries(await getImageValues(opts)).map(([imageKind, image]) =>
         nonsteam.setImage(entry.appId, imageKind as ImageKind, image)
       ));
+      if (opts.compatibilityToolVersion) {
+        const version = opts.compatibilityToolVersion === true ? null : opts.compatibilityToolVersion;
+        nonsteam.setCompatibilityToolVersion(entry.appId, version)
+      }
       log.info(`Saving to ${outputPath}...`);
       await nonsteam.save(outputPath);
     }
@@ -319,6 +332,7 @@ program.addCommand(new Command("delete")
       return;
     } else {
       nonsteam.deleteEntry(appId);
+      nonsteam.setCompatibilityToolVersion(entry.appId, null);
       log.info(`Saving to ${outputPath}...`);
       await nonsteam.save(outputPath);
     }
