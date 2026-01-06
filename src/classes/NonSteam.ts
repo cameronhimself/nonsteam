@@ -3,10 +3,9 @@ import { Shortcuts } from "./Shortcuts";
 import { getSteamInstallInfo } from "../utils";
 import path from "path";
 import fs from "fs/promises";
-import { file as tmpFile } from "tmp-promise";
+import { file as tmpFile, dir as tmpDir } from "tmp-promise";
 import { ImageKind } from "../types";
 import { mkdirp } from "mkdirp";
-import { parse as vdfParse, stringify as vdfStringify } from "@node-steam/vdf";
 
 const imageSuffixMap: Record<ImageKind, string> = {
   hero: "_hero",
@@ -21,27 +20,12 @@ const getImageFilename = (id: number, imageKind: ImageKind, extArg?: string) => 
   return `${id}${imageSuffixMap[imageKind]}${ext ? `.${ext}` : ""}`;
 }
 
-type SteamConfig = {
-  InstallConfigStore?: {
-    Software?: {
-      Valve?: {
-        Steam: {
-          CompatToolMapping?: {
-            [key: string]: { name: string, config: string, priority: number };
-          };
-        };
-      };
-    };
-  };
-}
-
 export class NonSteam {
   public readonly shortcuts: Shortcuts;
   public readonly savePath: string;
   public userId?: string;
   private _installInfo: Awaited<ReturnType<typeof getSteamInstallInfo>> | undefined;
   private _newImages: Record<string, { sourcePath: string, destPath: string }> = {};
-  private _steamConfig: SteamConfig = {};
 
   constructor(shortcuts: Shortcuts & { loadedPath: string });
   constructor(shortcuts: Shortcuts, savePath: string);
@@ -68,17 +52,10 @@ export class NonSteam {
     return this.installInfo?.users[0];
   }
 
-  static async load(shortcutsPath?: string) {
-    const shortcuts = await Shortcuts.load(shortcutsPath);
+  static async load(path?: string) {
+    const shortcuts = await Shortcuts.load(path);
     const nonsteam = new NonSteam(shortcuts);
     nonsteam._installInfo = await getSteamInstallInfo();
-
-    if (nonsteam._installInfo) {
-      const configPath = path.join(nonsteam._installInfo.path, 'config', 'config.vdf');
-      const config = await fs.readFile(configPath, 'utf8');
-      nonsteam._steamConfig = vdfParse(config);
-    }
-
     return nonsteam;
   }
 
@@ -141,21 +118,6 @@ export class NonSteam {
     return this;
   }
 
-  public setCompatibilityToolVersion(id: number, version: string | null): NonSteam {
-    if (this._steamConfig) {
-      const idString = `${id}`;
-      const mapping = this._steamConfig?.InstallConfigStore?.Software?.Valve?.Steam?.CompatToolMapping;
-      if (mapping) {
-        if (version) {
-          mapping[idString] = { name: version, config: "", priority: 250}
-        } else {
-          delete mapping[idString];
-        }
-      }
-    }
-    return this;
-  }
-
   public async save(outputPath?: string): Promise<this> {
     const userInfo = this.userInfo;
     if (!userInfo) {
@@ -166,16 +128,12 @@ export class NonSteam {
       .map(({ destPath }) => destPath)
       .map(p => path.parse(p).name)
     const imagesToDelete = newImageNames.length <= 0 ? [] : (await fs.readdir(userInfo.paths.grid))
-      .filter(filename => filename.match(new RegExp(`^(?:${newImageNames.join("|")}).`)))
+      .filter(filename => filename.match(new RegExp(`^(?:${newImageNames.join("|")})\.`)))
       .map(filename => path.resolve(userInfo.paths.grid, filename));
 
     await Promise.all(imagesToDelete.map(image => fs.rm(image)));
     await Promise.all(Object.values(this._newImages).map(({ sourcePath, destPath }) => fs.cp(sourcePath, destPath)));
     await this.shortcuts.save(outputPath);
-    if (this._installInfo?.path && this._steamConfig) {
-      console.log(vdfStringify(this._steamConfig));
-      await fs.writeFile(path.join(this._installInfo.path, 'config', 'config.vdf'), vdfStringify(this._steamConfig));
-    }
     return this;
   }
 }
